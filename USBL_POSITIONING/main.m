@@ -61,8 +61,7 @@ function position = positionCorrection(usbl_depth, usbl_euler, usbl_latitude, us
     persistent origin;
     position = zeros(3,1);
     
-    r_V = R(usbl_euler(3),usbl_euler(2),usbl_euler(1)) * [0; 0; auv_depth - usbl_depth];
-    r_V = [0 0 1] * r_V;
+    r_V = [0 0 1] * R(usbl_euler(3),usbl_euler(2),usbl_euler(1)) * [0; 0; auv_depth - usbl_depth];
     r_H = sqrt(usbl_range^2 - r_V^2);
     if isempty(origin)
         origin = [usbl_latitude, usbl_longitude, 0];
