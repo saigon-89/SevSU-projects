@@ -1,18 +1,8 @@
-%% OBJECT PARAMETERS (AUV)
-obj = load('geoRoute.mat');
-alt = 0;
-origin = [obj.latitude(1), obj.longitude(1), alt];
-[xEast, yNorth] = latlon2local(obj.latitude, obj.longitude, alt, origin);
-
-figure;
-plot(xEast, yNorth)
-axis('equal'); % set 1:1 aspect ratio to see real-world shapes
-
 %% ROTATION MATRICES
 Rx = @(phi)[1 0 0; 0 cos(phi) -sin(phi); 0 sin(phi) cos(phi)];
 Ry = @(theta)[cos(theta) 0 sin(theta); 0 1 0; -sin(theta) 0 cos(theta)];
 Rz = @(psi)[cos(psi) -sin(psi) 0; sin(psi) cos(psi) 0; 0 0 1];
-R = @(phi,theta,psi)[Rz(phi)*Ry(theta)*Rx(psi)]; % TODO
+R = @(phi,theta,psi)[Rz(psi)*Ry(theta)*Rx(phi)];
 
 %% SERIAL PORT
 serial_list = serialportlist("available");
@@ -61,7 +51,7 @@ function position = positionCorrection(usbl_depth, usbl_euler, usbl_latitude, us
     persistent origin;
     position = zeros(3,1);
     
-    r_V = [0 0 1] * R(usbl_euler(3),usbl_euler(2),usbl_euler(1)) * [0; 0; auv_depth - usbl_depth];
+    r_V = [0 0 1] * R(usbl_euler(1),usbl_euler(2),usbl_euler(3)) * [0; 0; auv_depth - usbl_depth];
     r_H = sqrt(usbl_range^2 - r_V^2);
     if isempty(origin)
         origin = [usbl_latitude, usbl_longitude, 0];
@@ -71,6 +61,6 @@ function position = positionCorrection(usbl_depth, usbl_euler, usbl_latitude, us
     dx = r_H*cos(usbl_bearing);
     position(1) = usbl_x + dx;
     position(2) = usbl_y + dy;
-    position = R(usbl_euler(3),usbl_euler(2),usbl_euler(1))' * position;
+    position = R(usbl_euler(1),usbl_euler(2),usbl_euler(3))' * position;
     position(3) = auv_depth;
 end
