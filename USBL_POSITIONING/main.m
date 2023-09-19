@@ -2,7 +2,6 @@
 Rx = @(phi)[1 0 0; 0 cos(phi) -sin(phi); 0 sin(phi) cos(phi)];
 Ry = @(theta)[cos(theta) 0 sin(theta); 0 1 0; -sin(theta) 0 cos(theta)];
 Rz = @(psi)[cos(psi) -sin(psi) 0; sin(psi) cos(psi) 0; 0 0 1];
-R = @(phi,theta,psi)[Rz(psi)*Ry(theta)*Rx(phi)];
 
 %% SERIAL PORT
 serial_list = serialportlist("available");
@@ -15,7 +14,7 @@ while (true)
         euler(3) = 0; % TODO
         display(euler)
         euler = deg2rad(euler);
-        rotation = R(euler(3),euler(2),euler(1));
+        rotation = Rz(euler(3))*Ry(euler(2))*Rx(euler(1));
 
         p1 = rotation*[-2 -2 0]';
         p2 = rotation*[2 -2 0]';
@@ -39,6 +38,7 @@ while (true)
 % z = [p1(3) p2(3) p3(3) p4(3)];
 % fill3(x, y, z, 2);
 % hold off
+
         xlabel('x'); ylabel('y'); zlabel('z'); 
         axis([-5 5 -5 5 -4 4])
         grid on
@@ -61,6 +61,7 @@ function position = positionCorrection(usbl_depth, usbl_euler, usbl_latitude, us
     dx = r_H*cos(usbl_bearing);
     position(1) = usbl_x + dx;
     position(2) = usbl_y + dy;
-    position = R(usbl_euler(1),usbl_euler(2),usbl_euler(3))' * position;
+    rot = Rz(usbl_euler(3))*Ry(usbl_euler(2))*Rx(usbl_euler(1));
+    position = rot' * position;
     position(3) = auv_depth;
 end

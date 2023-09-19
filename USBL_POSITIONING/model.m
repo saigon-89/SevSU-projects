@@ -1,3 +1,4 @@
+%% ПАРАМЕТРЫ МОДЕЛИРОВАНИЯ
 t = 0:0.01:120;
 lat_usbl = linspace(30,30,numel(t)) + 0.5e-6 .* sin(t/2.5);
 lon_usbl = linspace(40,40,numel(t)) + 1.0e-6 .* sin(t/2.5);
@@ -10,10 +11,10 @@ d_obj = 4;
 r_s = exp(t/35) + 7.5;
 alpha = deg2rad(t);
 
+%% ПРОЦЕДУРА РАСЧЕТА
 Rx = @(phi)[1 0 0; 0 cos(phi) -sin(phi); 0 sin(phi) cos(phi)];
 Ry = @(theta)[cos(theta) 0 sin(theta); 0 1 0; -sin(theta) 0 cos(theta)];
 Rz = @(psi)[cos(psi) -sin(psi) 0; sin(psi) cos(psi) 0; 0 0 1];
-R = @(phi,theta,psi)[Rz(psi)*Ry(theta)*Rx(phi)];
 r_v = t;
 r_h = t;
 x_obj = t;
@@ -35,6 +36,7 @@ for i=1:numel(t)
     y_obj_corr(i) = tmp(2);
 end
 
+%% ПОСТРОЕНИЕ ГРАФИКОВ
 figure
 plot(x_usbl, y_usbl)
 title('USBL Position')
@@ -42,7 +44,6 @@ xlabel('xEast')
 ylabel('yNorth')
 axis('equal');
 grid on
-
 figure
 plot(x_obj, y_obj)
 hold on
