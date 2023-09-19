@@ -38,19 +38,20 @@ end
 
 %% ПОСТРОЕНИЕ ГРАФИКОВ
 figure
+subplot(1,2,1)
 plot(x_usbl, y_usbl)
 title('USBL Position')
-xlabel('xEast')
-ylabel('yNorth')
+xlabel('East, m')
+ylabel('North, m')
 axis('equal');
 grid on
-figure
+subplot(1,2,2)
 plot(x_obj, y_obj)
 hold on
 plot(x_obj_corr, y_obj_corr)
 title('Object Position')
-xlabel('xEast')
-ylabel('yNorth')
+xlabel('East, m')
+ylabel('North, m')
 axis('equal');
 legend('false position', 'true position')
 grid on
