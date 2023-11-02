@@ -1,11 +1,7 @@
 %% MMT parameters
 L = 3081; % Длина ROV [mm]
 H = 295; % Высота ROV [mm]
-W = 295; % Ширина ROV [mm]
 rho = 1000; % Плотность жидкости [kg/m^3]
-PF = 10637.097; % Площадь фронтовой проекции [mm^2]
-PS = 23902.237; % Площадь боковой проекции [mm^2]
-PT = 13724.628; % Площадь верхней проекции [mm^2]
 m = 150; % Масса ROV [kg]
 
 r_b_b = [0; 0; 0];
@@ -13,6 +9,14 @@ r_g_b = [0; 0; 0];
 r_b_b = r_b_b / 10^3; % переводим [mm] в [m]
 r_g_b = r_g_b / 10^3; % переводим [mm] в [m]
 B = m * 9.81;
+
+l = L * 10^-3;
+r = 0.5*H * 10^-3;
+I0  = (m/12).*diag([ 6*r^2 (3*r^2 + l^2) (3*r^2 + l^2) ]);
+
+M_A = cylindrical_added_mass(m, (H/2)*10^-3, L*10^-3, rho); 
+
+MMT300 = UnderwaterVehicle(m,r_g_b,B,r_b_b,I0,M_A);
 
 %% THRUSTER ALLOCATION
 load('thrusters-load.mat')

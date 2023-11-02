@@ -119,12 +119,8 @@ classdef UnderwaterVehicle
             C = obj.C_RB(obj,v) + obj.C_A(obj,v);
         end
 
-        function dv = DirectDynamics(obj,v,eta,tau,fe)
-            %DIRECTDYNAMICS Пересчет ускорений подводного аппарата
-            %   Detailed explanation goes here
-            if isempty(obj.ThrusterAllocationMatrix)
-                dv = obj.M\(tau-obj.C(obj,v)*v-obj.g(obj,eta));
-            end
+        function a = dv(obj,v,eta,tau)
+            a = inv(obj.M
         end
     end
 
