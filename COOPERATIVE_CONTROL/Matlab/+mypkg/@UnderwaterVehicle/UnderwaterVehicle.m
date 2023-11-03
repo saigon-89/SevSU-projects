@@ -1,4 +1,4 @@
-classdef UnderwaterVehicle
+classdef UnderwaterVehicle < Simulink.Parameter
     %UNDERWATERVEHICLE Класс для работы с моделями подводных аппаратов
     %   Класс содержит методы для работы с кинематикой и пересчетом
     %   параметров динамики
@@ -10,8 +10,8 @@ classdef UnderwaterVehicle
         r_g_b (3,1) double {mustBeReal} % Вектор центра масс [м]
         I0    (3,3) double {mustBeReal} % Тензор инерции [кг * м^2]
         M_RB = zeros(6,6) % Матрица инерции твердого тела
-        M_A = zeros(6,6) % Матрица присоединенных масс
-        M = zeros(6,6) % Матрица инерции подводного аппарата
+        M_A = zeros(6,6)  % Матрица присоединенных масс
+        M = zeros(6,6)    % Матрица инерции подводного аппарата
         ThrusterAllocationMatrix
         ThrusterStaticCharacteristic
     end
@@ -119,8 +119,20 @@ classdef UnderwaterVehicle
             C = obj.C_RB(obj,v) + obj.C_A(obj,v);
         end
 
-        function a = dv(obj,v,eta,tau)
-            a = inv(obj.M
+        function dv = DirectDynamics(obj,v,eta,tau,he)
+            %DIRECTDYNAMICS Пересчет ускорений подводного аппарата
+            %   Detailed explanation goes here
+            if isempty(obj.ThrusterAllocationMatrix)
+                if nargin < 5
+                    he = zeros(6,1);
+                end
+                dv = obj.M\(tau+obj.J(obj,eta)*he-obj.C(obj,v)*v-obj.g(obj,eta));
+            end
+        end
+        function deta = DirectKinematics(obj,v,eta)
+            %DIRECTKINEMATICS Кинематика подводного аппарата
+            %   Detailed explanation goes here
+            deta = obj.J(obj,eta)^-1*v;
         end
     end
 
@@ -131,7 +143,7 @@ classdef UnderwaterVehicle
 
         function obj = set.B(obj,val)
             obj.B = val;
-        end   
+        end
 
         function M = get.M(obj)
             M = obj.M_RB + obj.M_A;
