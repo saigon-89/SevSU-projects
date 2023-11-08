@@ -1,6 +1,9 @@
 close all
 clear all
 
+set(0, 'DefaultAxesFontName', 'Arial');
+set(0, 'DefaultTextFontName', 'Arial');
+
 %% «¿√–”«»“‹ œ¿–¿Ã≈“–€ »« ‘¿…À¿
 auv_param
 
