@@ -22,7 +22,11 @@ function dx = odefcn(t,x,UV,TAU,HE)
             he = HE{i};
         end
         
-        tau = TAU{i};
+        Q = 1.*eye(2*n); R = 0.01.*eye(n); % матрицы штрафов
+        [K,~,~] = lqr(A,B,Q,R);
+            
+        %tau = TAU{i};
+        tau = -K*x((1 + offset):(2*n + offset));
         u = -g + tau + J*he; % без управления
         offset = 12 * (i - 1);
         dx((1 + offset):(2*n + offset)) = A*x((1 + offset):(2*n + offset)) + B*u;
