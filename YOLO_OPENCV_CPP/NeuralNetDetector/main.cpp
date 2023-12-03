@@ -43,12 +43,11 @@ class NeuralNetDetector {
     /** Отрисовка метки */
     void draw_label(cv::Mat& img, std::string label, int left, int top);
     /** Предобработка результатов */
-    std::vector<cv::Mat> pre_process(cv::Mat &img, cv::dnn::Net &net);
+    std::vector<cv::Mat> pre_process(cv::Mat &img);
     /** Постобработка результатов */
     cv::Mat post_process(cv::Mat &img, std::vector<cv::Mat> &outputs, 
                          const std::vector<std::string> &class_name);
   public:
-    NeuralNetDetector(const std::string model, const std::string classes);
     NeuralNetDetector(const std::string model, const std::string classes, 
                       int width, int height);
     std::vector<float> get_confidences(void) { return confidences_set; }
@@ -60,18 +59,8 @@ class NeuralNetDetector {
     cv::Mat process(cv::Mat &img);
 };
 
-NeuralNetDetector::NeuralNetDetector(const std::string model, const std::string classes) {
-  if (!init_network(model, classes)) {
-    std::cout << "Neural network been inited!" << std::endl;
-    std::cout << "Input width: " << input_width << std::endl;
-    std::cout << "Input height: " << input_height << std::endl;
-  } else {
-    std::cerr << "Failed to init neural network!" << std::endl;
-  }
-}
-
 NeuralNetDetector::NeuralNetDetector(const std::string model, const std::string classes, 
-                                     int width, int height) {
+                                     int width = 640, int height = 640) {
   input_width = width;
   input_height = height;
   if (!init_network(model, classes)) {
@@ -135,22 +124,21 @@ void NeuralNetDetector::draw_label(cv::Mat& img, std::string label, int left, in
               cv::FONT_HERSHEY_SIMPLEX, FONT_SCALE, YELLOW, THICKNESS);
 }
 
-std::vector<cv::Mat> NeuralNetDetector::pre_process(cv::Mat &img, cv::dnn::Net &net) {
+std::vector<cv::Mat> NeuralNetDetector::pre_process(cv::Mat &img) {
   // Convert to blob.
   cv::Mat blob;
   cv::dnn::blobFromImage(img, blob, 1.0 / 255.0, cv::Size(input_width, input_height), 
                          cv::Scalar(), true, false);
-  net.setInput(blob);
+  network.setInput(blob);
   // Forward propagate.
   std::vector<cv::Mat> outputs;
-  net.forward(outputs, net.getUnconnectedOutLayersNames());
+  network.forward(outputs, network.getUnconnectedOutLayersNames());
   return outputs;
 }
 
 cv::Mat NeuralNetDetector::post_process(cv::Mat &img, std::vector<cv::Mat> &outputs, 
                                         const std::vector<std::string> &class_name) {
   // Initialize vectors to hold respective outputs while unwrapping detections.
-  // TODO Очистка векторов
   cv::Mat ret = img.clone(); // тормозит на 0.1 сек
   classes_id_set.clear();
   confidences_set.clear();
@@ -233,7 +221,7 @@ cv::Mat NeuralNetDetector::post_process(cv::Mat &img, std::vector<cv::Mat> &outp
 
 cv::Mat NeuralNetDetector::process(cv::Mat &img) {
   std::vector<cv::Mat> detections;
-  detections = pre_process(img, network);
+  detections = pre_process(img);
   cv::Mat res = post_process(img, detections, NeuralNetDetector::classes);
   // Put efficiency information.
   // The function getPerfProfile returns the overall time for inference(t) and the timings for each of the layers(in layersTimes)
@@ -256,8 +244,8 @@ std::string NeuralNetDetector::get_info(void) {
 
 int main() {
     cv::VideoCapture source(0);
-    const std::string model_path = "nn/best.onnx";
-    const std::string classes_path = "nn/best.names";
+    const std::string model_path = "nn/yolov5s.onnx";
+    const std::string classes_path = "nn/coco.names";
     NeuralNetDetector detector(model_path, classes_path, 640, 640);
     cv::Mat frame; 
     while(cv::waitKey(1) < 1) {
@@ -266,9 +254,6 @@ int main() {
             cv::waitKey();
             break;
         }
-    #if 0
-    cv::Mat frame = cv::imread("nn/pipe1.png");   
-    #endif
     cv::Mat img = detector.process(frame);
     std::vector<int> class_ids = detector.get_class_ids();
     std::vector<float> confidences = detector.get_confidences();
