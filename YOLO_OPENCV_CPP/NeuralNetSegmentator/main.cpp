@@ -382,10 +382,11 @@ cv::Mat NeuralNetSegmentator::post_process(cv::Mat &img, std::vector<cv::Mat> &o
 }
 
 cv::Mat NeuralNetSegmentator::process(cv::Mat &img) {
+  cv::Mat input = img.clone();
   std::vector<cv::Mat> detections;
   cv::Vec4d params;
-  detections = pre_process(img, params);
-  cv::Mat res = post_process(img, detections, NeuralNetSegmentator::classes, params);
+  detections = pre_process(input, params);
+  cv::Mat res = post_process(input, detections, NeuralNetSegmentator::classes, params);
   // Put efficiency information.
   // The function getPerfProfile returns the overall time for inference(t) and the timings for each of the layers(in layersTimes)
   std::vector<double> layersTimes;
