@@ -1,3 +1,6 @@
 *.asv
 slprj
 *.slxc
+.vs/
+*.cache
+UNDERWATER_MANIPULATOR/C\#/UWManipulator/obj/Debug/UWManipulator.csproj.FileListAbsolute.txt
