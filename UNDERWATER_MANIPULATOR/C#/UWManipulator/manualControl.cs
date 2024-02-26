@@ -71,6 +71,11 @@ namespace UWManipulator
             q2_des = (2 * ((float)Math.PI) * trackBarLink2.Value) / trackBarLink2.Maximum;
             labelCoordinateLink2.Text = q2_des.ToString("0.0000");
         }
+        private void trackBarLink3_Scroll(object sender, EventArgs e)
+        {
+            q3_des = (2 * ((float)Math.PI) * trackBarLink3.Value) / trackBarLink3.Maximum;
+            labelCoordinateLink3.Text = q3_des.ToString("0.0000");
+        }
 
         private void manualControl_Load(object sender, EventArgs e)
         {
@@ -107,12 +112,6 @@ namespace UWManipulator
                 taskTXRoutine.Wait();
             }
             catch (AggregateException) { }
-        }
-
-        private void trackBarLink3_Scroll(object sender, EventArgs e)
-        {
-            q3_des = (2 * ((float)Math.PI) * trackBarLink3.Value) / trackBarLink3.Maximum;
-            labelCoordinateLink3.Text = q3_des.ToString("0.0000");
         }
     }
 }

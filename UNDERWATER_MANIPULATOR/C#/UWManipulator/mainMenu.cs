@@ -88,7 +88,7 @@ namespace UWManipulator
                 while (true)
                 {
                     RXRoutine();
-                    await Task.Delay(10, tokenRXRoutine.Token);
+                    await Task.Delay(250, tokenRXRoutine.Token);
                 }
             }, tokenRXRoutine.Token);
         }
@@ -114,7 +114,7 @@ namespace UWManipulator
             int Ret;
             byte Mode = 0, RTR = 0, DLC = 0;
             byte[] Data = new byte[8];
-            UInt32 CANID = 0, TH = 0, TL = 0, DL, DH;
+            UInt32 CANID = 0, TH = 0, TL = 0, DL = 0, DH = 0;
             uint RxMsgCnt = 0;
             for (byte ChIdx = 1; ChIdx < 3; ChIdx++)
             {
@@ -136,75 +136,59 @@ namespace UWManipulator
                                     DH = *(UInt32*)ph;
                                 }
                             }
-#if false
-                            MessageBox.Show("Mode   => " + Mode + "\n" +
-                                                "RTR    => " + RTR + "\n" +
-                                                "DLC    => " + DLC + "\n" +
-                                                "CANID  => 0x" + CANID.ToString("X") + "\n" +
-                                                "Data_L => 0x" + string.Format("{0:X8}", DL) + "\n" +
-                                                "Data_H => 0x" + string.Format("{0:X8}", DH) + "\n" +
-                                                "Msg_Time => " + String.Format("{0:0.0000}", (double)((TH << 32) + TL) / 10000) + " (sec)");
-#endif
                         }
+
                         if (RTR == 0)
                         {
-                            if ((CANID & 0x180) == 0x180)
+                            if (CANID == 0x181)
                             {
-                                //Data[0] = 0x00; Data[1] = 0x00; Data[2] = 0xCE; Data[3] = 0x17; Data[4] = 0x00; Data[5] = 0x00; Data[6] = 0x00; Data[7] = 0x00;
-                                if ((CANID & 0xF) == 1)
-                                {
-                                    Unit1.update_telemetry_id18x(Data, DLC);
-                                    u1_DataFreshStatus[0] = true;
-                                }
-                                if ((CANID & 0xF) == 2)
-                                {
-                                    Unit2.update_telemetry_id18x(Data, DLC);
-                                    u2_DataFreshStatus[0] = true;
-                                }
-                                if ((CANID & 0xF) == 3)
-                                {
-                                    Unit3.update_telemetry_id18x(Data, DLC);
-                                    u3_DataFreshStatus[0] = true;
-                                }
+                                Unit1.update_telemetry_id18x(Data, DLC);
+                                u1_DataFreshStatus[0] = true;
                             }
-                            else if ((CANID & 0x280) == 0x280)
+                            else if (CANID == 0x182)
                             {
-                                //Data[0] = 0xDB; Data[1] = 0x0F; Data[2] = 0x49; Data[3] = 0x40; Data[4] = 0x00; Data[5] = 0xC1; Data[6] = 0x71; Data[7] = 0x47;
-                                if ((CANID & 0xF) == 1)
-                                {
-                                    Unit1.update_telemetry_id28x(Data, DLC);
-                                    u1_DataFreshStatus[1] = true;
-                                }
-                                if ((CANID & 0xF) == 2)
-                                {
-                                    Unit2.update_telemetry_id28x(Data, DLC);
-                                    u2_DataFreshStatus[1] = true;
-                                }
-                                if ((CANID & 0xF) == 3)
-                                {
-                                    Unit3.update_telemetry_id28x(Data, DLC);
-                                    u3_DataFreshStatus[1] = true;
-                                }
+                                Unit2.update_telemetry_id18x(Data, DLC);
+                                u2_DataFreshStatus[0] = true;
                             }
-                            else if ((CANID & 0x380) == 0x380)
+                            else if (CANID == 0x183)
                             {
-                                //Data[0] = 0x48; Data[1] = 0xCE; Data[2] = 0xCF; Data[3] = 0xBB; Data[4] = 0xC0; Data[5] = 0xB4; Data[6] = 0x77; Data[7] = 0x3D;
-                                if ((CANID & 0xF) == 1)
-                                {
-                                    Unit1.update_telemetry_id38x(Data, DLC);
-                                    u1_DataFreshStatus[2] = true;
-                                }
-                                if ((CANID & 0xF) == 2)
-                                {
-                                    Unit2.update_telemetry_id38x(Data, DLC);
-                                    u2_DataFreshStatus[2] = true;
-                                }
-                                if ((CANID & 0xF) == 3)
-                                {
-                                    Unit3.update_telemetry_id38x(Data, DLC);
-                                    u3_DataFreshStatus[2] = true;
-                                }
+                                Unit3.update_telemetry_id18x(Data, DLC);
+                                u3_DataFreshStatus[0] = true;
                             }
+                            else if (CANID == 0x281)
+                            {
+                                Unit1.update_telemetry_id28x(Data, DLC);
+                                q1 = (float)((Unit1.id28x_data.workzone_counts / (float)(Constants.SERVOSILA_WORKZONE_COUNTS_PER_REVOLUTION)) * 2.0 * Math.PI);
+                                u1_DataFreshStatus[1] = true;
+                            }
+                            else if (CANID == 0x282)
+                            {
+                                Unit2.update_telemetry_id28x(Data, DLC);
+                                q2 = (float)((Unit2.id28x_data.workzone_counts / (float)(Constants.SERVOSILA_WORKZONE_COUNTS_PER_REVOLUTION)) * 2.0 * Math.PI);
+                                u2_DataFreshStatus[1] = true;
+                            }
+                            else if (CANID == 0x283)
+                            {
+                                Unit3.update_telemetry_id28x(Data, DLC);
+                                q3 = (float)((Unit3.id28x_data.workzone_counts / (float)(Constants.SERVOSILA_WORKZONE_COUNTS_PER_REVOLUTION)) * 2.0 * Math.PI);
+                                u3_DataFreshStatus[1] = true;
+                            }
+                            else if(CANID == 0x381)
+                            {
+                                Unit1.update_telemetry_id38x(Data, DLC);
+                                u1_DataFreshStatus[2] = true;
+                            }
+                            else if(CANID == 0x382)
+                            {
+                                Unit2.update_telemetry_id38x(Data, DLC);
+                                u2_DataFreshStatus[2] = true;
+                            }
+                            else if (CANID == 0x383)
+                            {
+                                Unit3.update_telemetry_id38x(Data, DLC);
+                                u3_DataFreshStatus[2] = true;
+                            }
+                        
 
                             if (u1_DataFreshStatus[0] && u1_DataFreshStatus[1] && u1_DataFreshStatus[2] &
                                 u2_DataFreshStatus[0] && u2_DataFreshStatus[1] && u2_DataFreshStatus[2] &
@@ -219,6 +203,32 @@ namespace UWManipulator
                                 u3_DataFreshStatus[0] = false;
                                 u3_DataFreshStatus[1] = false;
                                 u3_DataFreshStatus[2] = false;
+
+                                textBoxTelemetry.Text = "LINK[1]" + Environment.NewLine +
+                                    "Fault Bits: " + Unit1.id18x_data.fault_bits.ToString() + Environment.NewLine +
+                                    "Voltage: " + Unit1.id18x_data.voltage_dc.ToString("0.0000") + Environment.NewLine +
+                                    "Speed: " + Unit1.id18x_data.electrical_freq.ToString() + Environment.NewLine +
+                                    "Electrical Position: " + Unit1.id28x_data.electrical_position.ToString("0.0000") + Environment.NewLine +
+                                    "Work Zone Count: " + Unit1.id28x_data.workzone_counts.ToString("0") + Environment.NewLine +
+                                    "Current (Phase A): " + Unit1.id38x_data.phase_a_current.ToString("0.0000") + Environment.NewLine +
+                                    "Current (Phase B): " + Unit1.id38x_data.phase_b_current.ToString("0.0000") + Environment.NewLine +
+                                    Environment.NewLine + "LINK[2]" + Environment.NewLine +
+                                    "Fault Bits: " + Unit2.id18x_data.fault_bits.ToString() + Environment.NewLine +
+                                    "Voltage: " + Unit2.id18x_data.voltage_dc.ToString("0.0000") + Environment.NewLine +
+                                    "Speed: " + Unit2.id18x_data.electrical_freq.ToString() + Environment.NewLine +
+                                    "Electrical Position: " + Unit2.id28x_data.electrical_position.ToString("0.0000") + Environment.NewLine +
+                                    "Work Zone Count: " + Unit2.id28x_data.workzone_counts.ToString("0") + Environment.NewLine +
+                                    "Current (Phase A): " + Unit2.id38x_data.phase_a_current.ToString("0.0000") + Environment.NewLine +
+                                    "Current (Phase B): " + Unit2.id38x_data.phase_b_current.ToString("0.0000") + Environment.NewLine +
+                                    Environment.NewLine + "LINK[3]" + Environment.NewLine +
+                                    "Fault Bits: " + Unit3.id18x_data.fault_bits.ToString() + Environment.NewLine +
+                                    "Voltage: " + Unit3.id18x_data.voltage_dc.ToString("0.0000") + Environment.NewLine +
+                                    "Speed: " + Unit3.id18x_data.electrical_freq.ToString() + Environment.NewLine +
+                                    "Electrical Position: " + Unit3.id28x_data.electrical_position.ToString("0.0000") + Environment.NewLine +
+                                    "Work Zone Count: " + Unit3.id28x_data.workzone_counts.ToString("0") + Environment.NewLine +
+                                    "Current (Phase A): " + Unit3.id38x_data.phase_a_current.ToString("0.0000") + Environment.NewLine +
+                                    "Current (Phase B): " + Unit3.id38x_data.phase_b_current.ToString("0.0000") + Environment.NewLine;
+
                                 if (checkBoxCSVLogs.Checked && CSVHeaderStatus)
                                 {
                                     sw.Write(DateTime.Now.ToFileTime() + ";");
@@ -247,31 +257,6 @@ namespace UWManipulator
                                     sw.Write(Unit3.id38x_data.phase_b_current.ToString("0.0000") + "\n");
                                 }
                             }
-
-                            textBoxTelemetry.Text = "LINK[1]" + Environment.NewLine;
-                            textBoxTelemetry.Text += "Fault Bits: " + Unit1.id18x_data.fault_bits.ToString() + Environment.NewLine;
-                            textBoxTelemetry.Text += "Voltage: " + Unit1.id18x_data.voltage_dc.ToString("0.0000") + Environment.NewLine;
-                            textBoxTelemetry.Text += "Speed: " + Unit1.id18x_data.electrical_freq.ToString() + Environment.NewLine;
-                            textBoxTelemetry.Text += "Electrical Position: " + Unit1.id28x_data.electrical_position.ToString("0.0000") + Environment.NewLine;
-                            textBoxTelemetry.Text += "Work Zone Count: " + Unit1.id28x_data.workzone_counts.ToString("0") + Environment.NewLine;
-                            textBoxTelemetry.Text += "Current (Phase A): " + Unit1.id38x_data.phase_a_current.ToString("0.0000") + Environment.NewLine;
-                            textBoxTelemetry.Text += "Current (Phase B): " + Unit1.id38x_data.phase_b_current.ToString("0.0000") + Environment.NewLine;
-                            textBoxTelemetry.Text += Environment.NewLine + "LINK[2]" + Environment.NewLine;
-                            textBoxTelemetry.Text += "Fault Bits: " + Unit2.id18x_data.fault_bits.ToString() + Environment.NewLine;
-                            textBoxTelemetry.Text += "Voltage: " + Unit2.id18x_data.voltage_dc.ToString("0.0000") + Environment.NewLine;
-                            textBoxTelemetry.Text += "Speed: " + Unit2.id18x_data.electrical_freq.ToString() + Environment.NewLine;
-                            textBoxTelemetry.Text += "Electrical Position: " + Unit2.id28x_data.electrical_position.ToString("0.0000") + Environment.NewLine;
-                            textBoxTelemetry.Text += "Work Zone Count: " + Unit2.id28x_data.workzone_counts.ToString("0") + Environment.NewLine;
-                            textBoxTelemetry.Text += "Current (Phase A): " + Unit2.id38x_data.phase_a_current.ToString("0.0000") + Environment.NewLine;
-                            textBoxTelemetry.Text += "Current (Phase B): " + Unit2.id38x_data.phase_b_current.ToString("0.0000") + Environment.NewLine;
-                            textBoxTelemetry.Text += Environment.NewLine + "LINK[3]" + Environment.NewLine;
-                            textBoxTelemetry.Text += "Fault Bits: " + Unit3.id18x_data.fault_bits.ToString() + Environment.NewLine;
-                            textBoxTelemetry.Text += "Voltage: " + Unit3.id18x_data.voltage_dc.ToString("0.0000") + Environment.NewLine;
-                            textBoxTelemetry.Text += "Speed: " + Unit3.id18x_data.electrical_freq.ToString() + Environment.NewLine;
-                            textBoxTelemetry.Text += "Electrical Position: " + Unit3.id28x_data.electrical_position.ToString("0.0000") + Environment.NewLine;
-                            textBoxTelemetry.Text += "Work Zone Count: " + Unit3.id28x_data.workzone_counts.ToString("0") + Environment.NewLine;
-                            textBoxTelemetry.Text += "Current (Phase A): " + Unit3.id38x_data.phase_a_current.ToString("0.0000") + Environment.NewLine;
-                            textBoxTelemetry.Text += "Current (Phase B): " + Unit3.id38x_data.phase_b_current.ToString("0.0000") + Environment.NewLine;
                         }
                     }
                 }
@@ -310,9 +295,16 @@ namespace UWManipulator
                     taskRXRoutine.Wait();
                 }
                 catch (AggregateException) { }
-                VCI_SDK.VCI_CloseCAN((byte)COM);
-                Show_CmdStatus("CloseCAN Success!");
-                connectButton.Text = "Connect";
+                int Ret = VCI_SDK.VCI_CloseCAN((byte)COM);
+                if (Ret != 0)
+                {
+                    ShowErrMsg(Ret);
+                } 
+                else
+                {
+                    Show_CmdStatus("CloseCAN Success!");
+                    connectButton.Text = "Connect";
+                }
             }
             else if (comboBoxCOM.SelectedIndex > -1)
             {
@@ -353,7 +345,6 @@ namespace UWManipulator
 
         private void TCPRoutine()
         {
-            //textBoxTelemetry.Text += "TEST" + Environment.NewLine;
             //Console.WriteLine("Waiting for a connection...");
             TcpClient client = server.AcceptTcpClient();
 
