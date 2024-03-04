@@ -60,7 +60,7 @@ namespace UWManipulator
                 System.UInt32 electrical_freq_bits = ((System.UInt32)data[7] << 24) |
                     ((System.UInt32)data[6] << 16) |
                     ((System.UInt32)data[5] << 8) | data[4];
-                id18x_data.electrical_freq = electrical_freq_bits; // TODO
+                id18x_data.electrical_freq = System.BitConverter.ToSingle(BitConverter.GetBytes(electrical_freq_bits), 0);
             }
         }
 
@@ -71,12 +71,10 @@ namespace UWManipulator
                 System.UInt32 electrical_position_bits = ((System.UInt32)data[3] << 24) |
                     ((System.UInt32)data[2] << 16) |
                     ((System.UInt32)data[1] << 8) | data[0];
-                //id28x_data.electrical_position = electrical_position_bits; // TODO
                 id28x_data.electrical_position = System.BitConverter.ToSingle(BitConverter.GetBytes(electrical_position_bits), 0);
                 System.UInt32 workzone_counts_bits = ((System.UInt32)data[7] << 24) |
                     ((System.UInt32)data[6] << 16) |
                     ((System.UInt32)data[5] << 8) | data[4];
-                //id28x_data.workzone_counts = workzone_counts_bits; // TODO
                 id28x_data.workzone_counts = System.BitConverter.ToSingle(BitConverter.GetBytes(workzone_counts_bits), 0);
             }
         }
@@ -88,11 +86,11 @@ namespace UWManipulator
                 System.UInt32 phase_a_current_bits = ((System.UInt32)data[3] << 24) |
                     ((System.UInt32)data[2] << 16) |
                     ((System.UInt32)data[1] << 8) | data[0];
-                id38x_data.phase_a_current = phase_a_current_bits; // TODO
+                id38x_data.phase_a_current = System.BitConverter.ToSingle(BitConverter.GetBytes(phase_a_current_bits), 0);
                 System.UInt32 phase_b_current_bits = ((System.UInt32)data[7] << 24) |
                     ((System.UInt32)data[6] << 16) |
                     ((System.UInt32)data[5] << 8) | data[4];
-                id38x_data.phase_b_current = phase_b_current_bits; // TODO
+                id38x_data.phase_b_current = System.BitConverter.ToSingle(BitConverter.GetBytes(phase_b_current_bits), 0);
             }
         }
 
@@ -109,7 +107,7 @@ namespace UWManipulator
                 id = (uint)(Constants.SERVOSILA_RPDO_COB_ID | unit_id);
                 Array.Clear(data, 0, data.Length);
                 System.UInt32 freq_bits = 0;
-                freq_bits = (uint)BitConverter.ToInt32(BitConverter.GetBytes(freq), 0); // TODO
+                freq_bits = (uint)BitConverter.ToInt32(BitConverter.GetBytes(freq), 0);
                 data[0] = (byte)Constants.SERVOSILA_CMD_ESC_FREQ;
                 data[4] = (byte)(freq_bits & 0xFF);
                 data[5] = (byte)((freq_bits >> 8) & 0xFF);
@@ -126,7 +124,7 @@ namespace UWManipulator
                 id = (uint)(Constants.SERVOSILA_RPDO_COB_ID | unit_id);
                 Array.Clear(data, 0, data.Length);
                 System.UInt32 rpm_bits = 0;
-                rpm_bits = (uint)BitConverter.ToInt32(BitConverter.GetBytes(rpm), 0); // TODO
+                rpm_bits = (uint)BitConverter.ToInt32(BitConverter.GetBytes(rpm), 0);
                 data[0] = (byte)Constants.SERVOSILA_CMD_ESC_RPM;
                 data[4] = (byte)(rpm_bits & 0xFF);
                 data[5] = (byte)((rpm_bits >> 8) & 0xFF);
@@ -143,7 +141,7 @@ namespace UWManipulator
                 id = (uint)(Constants.SERVOSILA_RPDO_COB_ID | unit_id);
                 Array.Clear(data, 0, data.Length);
                 System.UInt32 pose_bits = 0;
-                pose_bits = (uint)BitConverter.ToInt32(BitConverter.GetBytes(pose), 0); // TODO
+                pose_bits = (uint)BitConverter.ToInt32(BitConverter.GetBytes(pose), 0);
                 data[0] = (byte)Constants.SERVOSILA_CMD_SERVO;
                 data[4] = (byte)(pose_bits & 0xFF);
                 data[5] = (byte)((pose_bits >> 8) & 0xFF);
@@ -166,7 +164,7 @@ namespace UWManipulator
                 id = (uint)(Constants.SERVOSILA_RPDO_COB_ID | unit_id);
                 Array.Clear(data, 0, data.Length);
                 System.UInt32 step_bits = 0;
-                step_bits = (uint)BitConverter.ToInt32(BitConverter.GetBytes(step), 0); // TODO
+                step_bits = (uint)BitConverter.ToInt32(BitConverter.GetBytes(step), 0);
                 data[0] = (byte)Constants.SERVOSILA_CMD_SERVO_STEPPER;
                 data[4] = (byte)(step_bits & 0xFF);
                 data[5] = (byte)((step_bits >> 8) & 0xFF);
@@ -189,7 +187,7 @@ namespace UWManipulator
                 id = (uint)(Constants.SERVOSILA_RPDO_COB_ID | unit_id);
                 Array.Clear(data, 0, data.Length);
                 System.UInt32 current_bits = 0;
-                current_bits = (uint)BitConverter.ToInt32(BitConverter.GetBytes(current), 0); // TODO
+                current_bits = (uint)BitConverter.ToInt32(BitConverter.GetBytes(current), 0);
                 data[0] = (byte)Constants.SERVOSILA_CMD_CURRENT;
                 data[4] = (byte)(current_bits & 0xFF);
                 data[5] = (byte)((current_bits >> 8) & 0xFF);
@@ -206,7 +204,7 @@ namespace UWManipulator
                 id = (uint)(Constants.SERVOSILA_RPDO_COB_ID | unit_id);
                 Array.Clear(data, 0, data.Length);
                 System.UInt32 torque_bits = 0;
-                torque_bits = (uint)BitConverter.ToInt32(BitConverter.GetBytes(torque), 0); // TODO
+                torque_bits = (uint)BitConverter.ToInt32(BitConverter.GetBytes(torque), 0);
                 data[0] = (byte)Constants.SERVOSILA_CMD_CURRENT;
                 data[4] = (byte)(torque_bits & 0xFF);
                 data[5] = (byte)((torque_bits >> 8) & 0xFF);
