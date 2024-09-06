@@ -152,40 +152,69 @@ cv::Mat NeuralNetDetector::post_process(cv::Mat &img, std::vector<cv::Mat> &outp
   float x_factor = img.cols / (float)input_width;
   float y_factor = img.rows / (float)input_height;
 
+  int dimensions = outputs[0].size[2];
+  int rows = outputs[0].size[1];
+  bool yolov8 = false;
+  if (dimensions > rows) {
+    yolov8 = true;
+    rows = outputs[0].size[2];
+    dimensions = outputs[0].size[1];
+    outputs[0] = outputs[0].reshape(1, dimensions);
+    cv::transpose(outputs[0], outputs[0]);
+  }
   float *data = (float *)outputs[0].data;
 
-  const int dimensions = class_name.size() + 5;
-  const int rows = 25200;
-  // Iterate through 25200 detections.
+  // Iterate through detections.
   for (int i = 0; i < rows; ++i) {
-    float confidence = data[4];
-    // Discard bad detections and continue.
-    if (confidence >= CONFIDENCE_THRESHOLD) {
-      float * classes_scores = data + 5;
-      // Create a 1x85 Mat and store class scores of 80 classes.
+    if (yolov8) {
+      float *classes_scores = data + 4;
       cv::Mat scores(1, class_name.size(), CV_32FC1, classes_scores);
-      // Perform minMaxLoc and acquire index of best class score.
       cv::Point class_id;
       double max_class_score;
       cv::minMaxLoc(scores, 0, &max_class_score, 0, &class_id);
-      // Continue if the class score is above the threshold.
       if (max_class_score > SCORE_THRESHOLD) {
-        // Store class ID and confidence in the pre-defined respective vectors.
-        confidences.push_back(confidence);
+        confidences.push_back(max_class_score);
         class_ids.push_back(class_id.x);
-        // Center.
         float cx = data[0];
         float cy = data[1];
-        // Box dimension.
         float w = data[2];
         float h = data[3];
-        // Bounding box coordinates.
         int left = int((cx - 0.5 * w) * x_factor);
         int top = int((cy - 0.5 * h) * y_factor);
         int width = int(w * x_factor);
         int height = int(h * y_factor);
-        // Store good detections in the boxes vector.
         boxes.push_back(cv::Rect(left, top, width, height));
+      }
+    } else {
+      float confidence = data[4];
+      // Discard bad detections and continue.
+      if (confidence >= CONFIDENCE_THRESHOLD) {
+        float * classes_scores = data + 5;
+        // Create a 1x85 Mat and store class scores of 80 classes.
+        cv::Mat scores(1, class_name.size(), CV_32FC1, classes_scores);
+        // Perform minMaxLoc and acquire index of best class score.
+        cv::Point class_id;
+        double max_class_score;
+        cv::minMaxLoc(scores, 0, &max_class_score, 0, &class_id);
+        // Continue if the class score is above the threshold.
+        if (max_class_score > SCORE_THRESHOLD) {
+          // Store class ID and confidence in the pre-defined respective vectors.
+          confidences.push_back(confidence);
+          class_ids.push_back(class_id.x);
+          // Center.
+          float cx = data[0];
+          float cy = data[1];
+          // Box dimension.
+          float w = data[2];
+          float h = data[3];
+          // Bounding box coordinates.
+          int left = int((cx - 0.5 * w) * x_factor);
+          int top = int((cy - 0.5 * h) * y_factor);
+          int width = int(w * x_factor);
+          int height = int(h * y_factor);
+          // Store good detections in the boxes vector.
+          boxes.push_back(cv::Rect(left, top, width, height));
+        }
       }
     }
     // Jump to the next column.
@@ -244,7 +273,7 @@ std::string NeuralNetDetector::get_info(void) {
 
 int main() {
     cv::VideoCapture source(0);
-    const std::string model_path = "nn/yolov5s.onnx";
+    const std::string model_path = "nn/yolov8s.onnx";
     const std::string classes_path = "nn/coco.names";
     NeuralNetDetector detector(model_path, classes_path, 640, 640);
     cv::Mat frame; 
