@@ -64,7 +64,12 @@ UUV3.nu0 = [0; 0; 0; 0; 0; 0];
 UUV3.eta_end = [12; 1; 5; 0; 0; 0];
 UUV3.nu_end = [0; 0; 0; 0; 0; 0];
 
-FORMATION = [UUV1; UUV2; UUV3];
+UUV4.eta0 = [-4; -1; 0; 0; 0; 0];
+UUV4.nu0 = [0; 0; 0; 0; 0; 0];
+UUV4.eta_end = [12; 5; 5; 0; 0; 0];
+UUV4.nu_end = [0; 0; 0; 0; 0; 0];
+
+FORMATION = [UUV1; UUV2; UUV3; UUV4];
 
 t = 0:0.01:10;
 
@@ -111,12 +116,18 @@ function f = objectiveFcn(x, FORMATION, TRACKS, t)
     P_set = x(2*n+1:3*n);
     FORMATION = update_iteration(FORMATION, TRACKS, M_set, N_set, P_set, t);
     L = 0;
-    D = 0;
+    D_min = 0;
+    D_max = 0;
+    V_min = 0;
+    V_max = 0;
     for i = 1:numel(FORMATION)
         L = L + FORMATION(i).l;
-        D = D + FORMATION(i).d_min;
+        D_min = D_min + FORMATION(i).d_min;
+        D_max = D_max + FORMATION(i).d_max;
+        V_min = V_min + FORMATION(i).V_min;
+        V_max = V_max + FORMATION(i).V_max;
     end
-    f = L + 1/D;
+    f = L - 1500 * D_min + 100 * D_max - 1000 * V_min + 1000 * V_max;
 end
 
 function FORMATION = update_iteration(FORMATION, TRACKS, M_set, N_set, P_set, t)
