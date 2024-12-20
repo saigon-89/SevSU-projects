@@ -73,11 +73,14 @@ FORMATION = [UUV1; UUV2; UUV3; UUV4];
 
 t = 0:0.01:10;
 
+[ENV.X, ENV.Y] = meshgrid(-4:0.2:12.09, -1:0.2:5.608);
+ENV.Z = exp(ENV.X ./ 30) .* (sin(ENV.X) + cos(ENV.Y) + 6);
+
 % Pass fixed parameters to objfun
-objfun = @(x)objectiveFcn(x, FORMATION, TRACKS, t);
+objfun = @(x)objectiveFcn(x, FORMATION, TRACKS, ENV, t);
 
 % Set nondefault solver options
-options = optimoptions("particleswarm", "PlotFcn", "pswplotbestf");
+options = optimoptions("particleswarm", "PlotFcn", "pswplotbestf", 'MaxIterations', 50);
 
 n = numel(FORMATION);
 m = 3; % parameters to optimize
@@ -89,7 +92,7 @@ M_set = solution(1:n);
 N_set = solution(n+1:2*n);
 P_set = solution(2*n+1:3*n);
 
-FORMATION = update_iteration(FORMATION, TRACKS, M_set, N_set, P_set, t);
+FORMATION = update_iteration(FORMATION, TRACKS, ENV, M_set, N_set, P_set, t);
 
 figure
 legend
@@ -109,13 +112,54 @@ for i = 1:numel(FORMATION)
         'rO', 'HandleVisibility', 'off')
 end
 
-function f = objectiveFcn(x, FORMATION, TRACKS, t)
+x_gen = [];
+y_gen = [];
+z_gen = [];
+for i = 1:numel(FORMATION)
+    x_gen = [x_gen, FORMATION(i).x];
+    y_gen = [y_gen, FORMATION(i).y];
+    z_gen = [z_gen, FORMATION(i).z];
+end
+
+min_x = min(x_gen);
+min_y = min(y_gen);
+min_z = min(z_gen);
+max_x = max(x_gen);
+max_y = max(y_gen);
+max_z = max(z_gen);
+
+colormap copper
+mesh(ENV.X, ENV.Y, ENV.Z, 'HandleVisibility', 'off')
+zlim([0; max(ENV.Z(:)) + 1])
+
+X = [min_x max_x max_x min_x min_x max_x max_x min_x];
+Y = [min_y min_y max_y max_y min_y min_y max_y max_y];
+Z = [max(ENV.Z(:)) max(ENV.Z(:)) max(ENV.Z(:)) max(ENV.Z(:)) 0 0 0 0];
+
+faces = [ 1 2 3 4; ...
+          5 6 7 8; ...
+          1 2 6 5; ...
+          2 3 7 6; ...
+          3 4 8 7; ...
+          4 1 5 8; ];
+
+for i = 1:size(faces, 1)
+    patch('Vertices', [X' Y' Z'], 'Faces', faces(i,:), ...
+        'FaceColor', [0 0 1], 'FaceAlpha', 0.025, ...
+        'HandleVisibility', 'off', 'EdgeColor', 'None');
+end
+
+xlim([min_x - 1; max_x + 1])
+ylim([min_y - 1; max_y + 1])
+
+function f = objectiveFcn(x, FORMATION, TRACKS, ENV, t)
     n = numel(FORMATION);
     M_set = x(1:n);
     N_set = x(n+1:2*n);
     P_set = x(2*n+1:3*n);
-    FORMATION = update_iteration(FORMATION, TRACKS, M_set, N_set, P_set, t);
+    FORMATION = update_iteration(FORMATION, TRACKS, ENV, M_set, N_set, P_set, t);
     L = 0;
+    C = 0;
     D_min = 0;
     D_max = 0;
     V_min = 0;
@@ -126,11 +170,14 @@ function f = objectiveFcn(x, FORMATION, TRACKS, t)
         D_max = D_max + FORMATION(i).d_max;
         V_min = V_min + FORMATION(i).V_min;
         V_max = V_max + FORMATION(i).V_max;
+        if FORMATION(i).collision
+            C = C + 10000;
+        end
     end
-    f = L - 1500 * D_min + 100 * D_max - 1000 * V_min + 1000 * V_max;
+    f = L - 1500 * D_min + 100 * D_max - 1000 * V_min + 1000 * V_max + C;
 end
 
-function FORMATION = update_iteration(FORMATION, TRACKS, M_set, N_set, P_set, t)
+function FORMATION = update_iteration(FORMATION, TRACKS, ENV, M_set, N_set, P_set, t)
     for i = 1:numel(FORMATION)
         FORMATION(i).px = TRACKS.pxf(FORMATION(i).eta0, FORMATION(i).nu0, FORMATION(i).eta_end, FORMATION(i).nu_end, M_set(i), t(1), t(end));
         FORMATION(i).py = TRACKS.pyf(FORMATION(i).eta0, FORMATION(i).nu0, FORMATION(i).eta_end, FORMATION(i).nu_end, N_set(i), t(1), t(end));
@@ -187,5 +234,13 @@ function FORMATION = update_iteration(FORMATION, TRACKS, M_set, N_set, P_set, t)
                 FORMATION(i).z(j) - FORMATION(i).z(j - 1)]);
         end
         FORMATION(i).l = L;
+    end
+
+    for i = 1:numel(FORMATION)
+        FORMATION(i).collision = false;
+        z_env = interp2(ENV.X, ENV.Y, ENV.Z, FORMATION(i).x, FORMATION(i).y);
+        if any(FORMATION(i).z > z_env) || any(FORMATION(i).z < 0)
+            FORMATION(i).collision = true;
+        end
     end
 end
