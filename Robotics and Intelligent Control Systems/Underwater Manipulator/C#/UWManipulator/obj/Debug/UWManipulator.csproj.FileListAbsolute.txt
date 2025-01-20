@@ -1,0 +1,15 @@
+C:\Users\saigon\Documents\GitHub\SevSU-projects\UNDERWATER_MANIPULATOR\C#\UWManipulator\bin\Debug\UWManipulator.exe.config
+C:\Users\saigon\Documents\GitHub\SevSU-projects\UNDERWATER_MANIPULATOR\C#\UWManipulator\bin\Debug\UWManipulator.exe
+C:\Users\saigon\Documents\GitHub\SevSU-projects\UNDERWATER_MANIPULATOR\C#\UWManipulator\bin\Debug\UWManipulator.pdb
+C:\Users\saigon\Documents\GitHub\SevSU-projects\UNDERWATER_MANIPULATOR\C#\UWManipulator\bin\Debug\mVCI_CAN_DotNET.dll
+C:\Users\saigon\Documents\GitHub\SevSU-projects\UNDERWATER_MANIPULATOR\C#\UWManipulator\bin\Debug\VCI_CAN_DotNET.dll
+C:\Users\saigon\Documents\GitHub\SevSU-projects\UNDERWATER_MANIPULATOR\C#\UWManipulator\obj\Debug\UWManipulator.csproj.AssemblyReference.cache
+C:\Users\saigon\Documents\GitHub\SevSU-projects\UNDERWATER_MANIPULATOR\C#\UWManipulator\obj\Debug\UWManipulator.mainMenu.resources
+C:\Users\saigon\Documents\GitHub\SevSU-projects\UNDERWATER_MANIPULATOR\C#\UWManipulator\obj\Debug\UWManipulator.manualControl.resources
+C:\Users\saigon\Documents\GitHub\SevSU-projects\UNDERWATER_MANIPULATOR\C#\UWManipulator\obj\Debug\UWManipulator.Properties.Resources.resources
+C:\Users\saigon\Documents\GitHub\SevSU-projects\UNDERWATER_MANIPULATOR\C#\UWManipulator\obj\Debug\UWManipulator.telemetryPlotter.resources
+C:\Users\saigon\Documents\GitHub\SevSU-projects\UNDERWATER_MANIPULATOR\C#\UWManipulator\obj\Debug\UWManipulator.csproj.GenerateResource.cache
+C:\Users\saigon\Documents\GitHub\SevSU-projects\UNDERWATER_MANIPULATOR\C#\UWManipulator\obj\Debug\UWManipulator.csproj.CoreCompileInputs.cache
+C:\Users\saigon\Documents\GitHub\SevSU-projects\UNDERWATER_MANIPULATOR\C#\UWManipulator\obj\Debug\UWManipu.B84B5186.Up2Date
+C:\Users\saigon\Documents\GitHub\SevSU-projects\UNDERWATER_MANIPULATOR\C#\UWManipulator\obj\Debug\UWManipulator.exe
+C:\Users\saigon\Documents\GitHub\SevSU-projects\UNDERWATER_MANIPULATOR\C#\UWManipulator\obj\Debug\UWManipulator.pdb
