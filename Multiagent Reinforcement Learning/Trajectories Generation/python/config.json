@@ -1,1 +1,1 @@
-{"map_size": 25}
+{"MAP_SIZE": 25, "ANGLE_STATE_SIZE": 30, "DISTANCE_STATE_SIZE": 25}

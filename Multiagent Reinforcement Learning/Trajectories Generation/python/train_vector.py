@@ -6,44 +6,53 @@ from point import Point, calc_distance, calc_angle
 from actions import actions
 import json
 import math
+from value_to_state import distance_to_state, angle_to_state
 
-map_size = 25
-max_iterations = 25
-max_epochs = 100000
-learning_rate = 0.8
-discount_factor = 0.95
-# exploration_prob = 0.2
-angle_states = 360
-distance_states = math.ceil(math.sqrt(2) * map_size)
-Q_table = np.zeros((distance_states, angle_states, len(actions)))
+MAX_ITERATIONS = 25
+MAX_EPOCHS = 100000
+LEARNING_RATE = 0.8
+DISCOUNT_FACTOR = 0.95
+
+MAP_SIZE = 25
+ANGLE_STATE_SIZE = 30
+DISTANCE_STATE_SIZE = 25
+
+max_possible_distance = math.ceil(math.sqrt(2) * MAP_SIZE)
+
+Q_table = np.zeros((DISTANCE_STATE_SIZE, ANGLE_STATE_SIZE, len(actions)), float)
 
 
-for epoch in range(max_epochs):
+
+for epoch in range(MAX_EPOCHS):
     print("epoch", epoch)
     iteration = 0
-    agent = Point(random.randint(0, map_size-1), random.randint(0, map_size-1))
-    goal = Point(random.randint(0, map_size-1), random.randint(0, map_size-1))
+    agent = Point(random.randint(0, MAP_SIZE-1), random.randint(0, MAP_SIZE-1))
+    goal = Point(random.randint(0, MAP_SIZE-1), random.randint(0, MAP_SIZE-1))
     if agent == goal:
         continue
-    while (iteration < max_iterations):
+    while (iteration < MAX_ITERATIONS):
         old_distance = calc_distance(agent, goal)
-        old_angle = calc_angle(agent, goal) + 180 - 1
-        old_state = Q_table[int(old_distance), int(old_angle)]
+        old_angle = calc_angle(agent, goal)
+        distance_state = distance_to_state(old_distance, max_possible_distance, DISTANCE_STATE_SIZE)
+        angle_state = angle_to_state(old_angle, ANGLE_STATE_SIZE)
+        old_state = Q_table[distance_state, angle_state]
 
         # Choose action with epsilon-greedy strategy
-        exploration_prob = 1 - epoch/max_epochs
+        exploration_prob = 1 - epoch / MAX_EPOCHS
         if np.random.rand() < exploration_prob:
             action_index = random.randint(0, len(actions) - 1) # Explore
         else:
             action_index = np.argmax(old_state) # Exploit
         action = actions[action_index]
         action(point=agent)
-        if not (0 <= agent.x < map_size) or not (0 <= agent.y < map_size):
+        if not (0 <= agent.x < MAP_SIZE) or not (0 <= agent.y < MAP_SIZE):
             old_state[action_index] = -1
             break
         new_distance = calc_distance(agent, goal)
-        new_angle = calc_angle(agent, goal) + 180 - 1
-        new_state = Q_table[int(new_distance), int(new_angle)]
+        new_angle = calc_angle(agent, goal)
+        distance_state = distance_to_state(new_distance, max_possible_distance, DISTANCE_STATE_SIZE)
+        angle_state = angle_to_state(new_angle, ANGLE_STATE_SIZE)
+        new_state = Q_table[distance_state, angle_state]
         distance_diff = old_distance - new_distance
         reward = distance_diff
         if calc_distance(agent, goal) == 0:
@@ -51,8 +60,8 @@ for epoch in range(max_epochs):
             break
 
         # Update Q-value using the Q-learning update rule
-        old_state[action_index] += learning_rate * \
-        (reward + discount_factor *
+        old_state[action_index] += LEARNING_RATE * \
+        (reward + DISCOUNT_FACTOR *
         np.max(new_state) - old_state[action_index])
         iteration += 1
 
@@ -60,6 +69,9 @@ np.save("model.npy", Q_table)
 
 with open("config.json", "w") as config_file:
     config = {
-        "map_size": map_size
+        "MAP_SIZE": MAP_SIZE,
+        "ANGLE_STATE_SIZE": ANGLE_STATE_SIZE,
+        "DISTANCE_STATE_SIZE": DISTANCE_STATE_SIZE
     }
     json.dump(config, config_file)
+
