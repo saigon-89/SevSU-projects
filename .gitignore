@@ -5,3 +5,4 @@ slprj
 *.cache
 UNDERWATER_MANIPULATOR/C\#/UWManipulator/obj/Debug/UWManipulator.csproj.FileListAbsolute.txt
 __pycache__
+model.npy
