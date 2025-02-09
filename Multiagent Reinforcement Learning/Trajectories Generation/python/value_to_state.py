@@ -1,5 +1,5 @@
 import math
-from point import Point
+from point import Point, calc_distance
 
 def angle_to_state(angle: float, state_size):
     """
@@ -13,14 +13,25 @@ def distance_to_state(distance: float, max_distance: float, state_size):
     """
     return math.floor(distance / max_distance * state_size) - 1
 
-def calc_obstacles_state(target: Point, obstacles: list[Point]) -> int:
-    obstacles = [(o.x, o.y) for o in obstacles]
-    power = 0
+def calc_obstacles_state(agent: Point, target: Point, obstacles: list[Point], max_distance: float, state_size) -> tuple[int, int]:
+    def target_visible(agent: Point, target: Point, obstacle: Point):
+        obstacle_bounding_box = [
+            (obstacle.x - 0.5, obstacle.y - 0.5, obstacle.x - 0.5, obstacle.y + 0.5),
+            (obstacle.x - 0.5, obstacle.y + 0.5, obstacle.x + 0.5, obstacle.y + 0.5),
+            (obstacle.x + 0.5, obstacle.y + 0.5, obstacle.x + 0.5, obstacle.y - 0.5),
+        ]
+        for line in obstacle_bounding_box:
+            sign_1_x = agent.x - line[0]
+            sign_1_y = agent.y - line[1]
+            sign_2_x = target.x - line[2]
+            sign_2_y = target.y - line[3]
+            return not (((sign_1_x > 0) != (sign_2_x > 0)) and ((sign_1_y > 0) != (sign_2_y > 0)))
+    closest_obstacle = max_distance-1
     state = 0
-    for i in [-1, 0, 1]:
-        for j in [-1, 0, 1]:
-            if i != 0 or j != 0:
-                if (target.x + i, target.y + j) in obstacles:
-                    state += pow(2,power)
-                power += 1
-    return state
+    for index, obstacle in enumerate(obstacles):
+        visibility = target_visible(agent, target, obstacle)
+        if not visibility:
+            closest_obstacle = min(closest_obstacle, distance_to_state(calc_distance(agent, obstacle), max_distance, state_size))
+            state = 1
+            # return 1, distance_to_state(calc_distance(agent, obstacle), max_distance, state_size)
+    return state, closest_obstacle
