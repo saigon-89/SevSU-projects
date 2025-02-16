@@ -3,7 +3,7 @@ from point import Point, calc_distance, calc_angle
 from actions import actions
 import matplotlib.pyplot as plt
 import json
-from value_to_state import distance_to_state, angle_to_state, calc_obstacles_state
+from value_to_state import distance_to_state, angle_to_state, calc_obstacles_state, calc_close_obstacles_state
 import math
 from matplotlib.colors import ListedColormap
 import random
@@ -37,8 +37,9 @@ MAP_SIZE = int(config.get("MAP_SIZE"))
 ANGLE_STATE_SIZE = int(config.get("ANGLE_STATE_SIZE"))
 DISTANCE_STATE_SIZE = int(config.get("DISTANCE_STATE_SIZE"))
 OBSTACLE_DISTANCE_STATE_SIZE = int(config.get("OBSTACLE_DISTANCE_STATE_SIZE"))
+CLOSE_OBSTACLES_STATE_SIZE = int(config.get("CLOSE_OBSTACLES_STATE_SIZE"))
 
-for iteration in range(20):
+for iteration in range(100):
     # agent_pos = [2, 10]
     # goal_pos = [23, 15]
     agent_pos = [random.randint(0, MAP_SIZE-1), random.randint(0, MAP_SIZE-1)]
@@ -68,7 +69,8 @@ for iteration in range(20):
             distance_state = distance_to_state(distance, max_possible_distance, DISTANCE_STATE_SIZE)
             angle_state = angle_to_state(angle, ANGLE_STATE_SIZE)
             obstacles_state, dto_state = calc_obstacles_state(agent, goal, obstacles, max_possible_distance, OBSTACLE_DISTANCE_STATE_SIZE)
-            state = Q_table[distance_state, angle_state, obstacles_state, dto_state]
+            close_obstacles_state = calc_close_obstacles_state(agent, goal, obstacles)
+            state = Q_table[distance_state, angle_state, obstacles_state, dto_state, close_obstacles_state]
             action_index = np.argmax(state)
             action = actions[action_index]
             action(point=agent)

@@ -6,10 +6,10 @@ from point import Point, calc_distance, calc_angle
 from actions import actions
 import json
 import math
-from value_to_state import distance_to_state, angle_to_state, calc_obstacles_state
+from value_to_state import distance_to_state, angle_to_state, calc_obstacles_state, calc_close_obstacles_state
 
 MAX_ITERATIONS = 25
-MAX_EPOCHS = 1000000
+MAX_EPOCHS = 10000000
 LEARNING_RATE = 0.8
 DISCOUNT_FACTOR = 0.95
 
@@ -19,9 +19,9 @@ DISTANCE_STATE_SIZE = 1
 OBSTACLE_STATE_SIZE = 2
 max_possible_distance = math.ceil(math.sqrt(2) * MAP_SIZE)
 OBSTACLE_DISTANCE_STATE_SIZE = max_possible_distance
+CLOSE_OBSTACLES_STATE_SIZE = 32
 
-
-Q_table = np.zeros((DISTANCE_STATE_SIZE, ANGLE_STATE_SIZE, OBSTACLE_STATE_SIZE, OBSTACLE_DISTANCE_STATE_SIZE, len(actions)), float)
+Q_table = np.zeros((DISTANCE_STATE_SIZE, ANGLE_STATE_SIZE, OBSTACLE_STATE_SIZE, OBSTACLE_DISTANCE_STATE_SIZE, CLOSE_OBSTACLES_STATE_SIZE, len(actions)), float)
 
 try:
     for epoch in range(MAX_EPOCHS):
@@ -45,8 +45,9 @@ try:
             angle_state = angle_to_state(old_angle, ANGLE_STATE_SIZE)
 
             obstacles_state, dto_state = calc_obstacles_state(agent, goal, obstacles, max_possible_distance, OBSTACLE_DISTANCE_STATE_SIZE)
+            close_obstacles_state = calc_close_obstacles_state(agent, goal, obstacles)
 
-            old_state = Q_table[distance_state, angle_state, obstacles_state, dto_state]
+            old_state = Q_table[distance_state, angle_state, obstacles_state, dto_state, close_obstacles_state]
 
             # Choose action with epsilon-greedy strategy
             exploration_prob = 1 - epoch / MAX_EPOCHS
@@ -62,8 +63,9 @@ try:
             angle_state = angle_to_state(new_angle, ANGLE_STATE_SIZE)
 
             obstacles_state, dto_state = calc_obstacles_state(agent, goal, obstacles, max_possible_distance, OBSTACLE_DISTANCE_STATE_SIZE)
+            close_obstacles_state = calc_close_obstacles_state(agent, goal, obstacles)
 
-            new_state = Q_table[distance_state, angle_state, obstacles_state, dto_state]
+            new_state = Q_table[distance_state, angle_state, obstacles_state, dto_state, close_obstacles_state]
 
             distance_diff = old_distance - new_distance
             reward = distance_diff / 100
@@ -92,7 +94,8 @@ with open("config.json", "w") as config_file:
         "MAP_SIZE": MAP_SIZE,
         "ANGLE_STATE_SIZE": ANGLE_STATE_SIZE,
         "DISTANCE_STATE_SIZE": DISTANCE_STATE_SIZE,
-        "OBSTACLE_DISTANCE_STATE_SIZE": OBSTACLE_DISTANCE_STATE_SIZE
+        "OBSTACLE_DISTANCE_STATE_SIZE": OBSTACLE_DISTANCE_STATE_SIZE,
+        "CLOSE_OBSTACLES_STATE_SIZE": CLOSE_OBSTACLES_STATE_SIZE
     }
     json.dump(config, config_file)
 
