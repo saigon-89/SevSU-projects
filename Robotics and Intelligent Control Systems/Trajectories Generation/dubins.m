@@ -80,7 +80,7 @@ ENV.Z = exp(ENV.X ./ 30) .* (sin(ENV.X) + cos(ENV.Y) + 6);
 objfun = @(x)objectiveFcn(x, FORMATION, TRACKS, ENV, t);
 
 % Set nondefault solver options
-options = optimoptions("particleswarm", "PlotFcn", "pswplotbestf", 'MaxIterations', 50);
+options = optimoptions("particleswarm", "PlotFcn", "pswplotbestf", 'MaxIterations', 1);
 
 n = numel(FORMATION);
 m = 3; % parameters to optimize
@@ -105,12 +105,14 @@ ylabel('y, m')
 zlabel('z, m')
 grid on
 hold on
+
 for i = 1:numel(FORMATION)
     name = sprintf('UUV%d', i);
     plot3(FORMATION(i).x, FORMATION(i).y, FORMATION(i).z, 'DisplayName', name)
     plot3(FORMATION(i).eta_end(1), FORMATION(i).eta_end(2), FORMATION(i).eta_end(3), ...
         'rO', 'HandleVisibility', 'off')
 end
+
 
 x_gen = [];
 y_gen = [];
@@ -151,6 +153,30 @@ end
 
 xlim([min_x - 1; max_x + 1])
 ylim([min_y - 1; max_y + 1])
+
+% Find and plot angles
+figure; colormap copper
+formation_len = length(FORMATION(1).x);
+% Angles for projection on X, Y axes
+angles_x = zeros(numel(FORMATION), formation_len);
+angles_y = zeros(numel(FORMATION), formation_len);
+for i = 1:numel(FORMATION)
+    subplot(2,2,i);
+    for j = 2:formation_len
+        angles_x(i,j) = atan2d(FORMATION(i).y(j) - FORMATION(i).y(j-1), FORMATION(i).x(j) - FORMATION(i).x(j-1));
+        angles_y(i,j) = atan2d(FORMATION(i).z(j) - FORMATION(i).z(j-1), FORMATION(i).y(j) - FORMATION(i).y(j-1));
+    end
+    % First angle value is zero, because of atan2. Set First value equal to
+    % second value, so the plot looks less ugly.
+    angles_x(i,1) = angles_x(i,2);
+    angles_y(i,1) = angles_y(i,2);
+    px = plot(angles_x(i,:)); hold on; 
+    py = plot(angles_y(i,:)); hold on;
+    title("UUW"+ i);
+    xlabel('iteration/time'); ylabel('angle, deg');
+    legend([px,py], ["heading", "pitch"]);
+end
+
 
 function f = objectiveFcn(x, FORMATION, TRACKS, ENV, t)
     n = numel(FORMATION);
