@@ -80,13 +80,13 @@ ENV.Z = exp(ENV.X ./ 30) .* (sin(ENV.X) + cos(ENV.Y) + 6);
 objfun = @(x)objectiveFcn(x, FORMATION, TRACKS, ENV, t);
 
 % Set nondefault solver options
-options = optimoptions("particleswarm", "PlotFcn", "pswplotbestf", 'MaxIterations', 1);
+options = optimoptions("particleswarm", "PlotFcn", "pswplotbestf", 'MaxIterations', 100);
 
 n = numel(FORMATION);
 m = 3; % parameters to optimize
 
 % Solve
-[solution, objectiveValue] = particleswarm(objfun, m * n, repmat(0.01, m * n, 1), ones(m * n, 1), options);
+[solution, objectiveValue] = customparticleswarm(objfun, m * n, repmat(0.01, m * n, 1), ones(m * n, 1), @selfAcceleration, @socialAcceleration, options);
 
 M_set = solution(1:n);
 N_set = solution(n+1:2*n);
@@ -270,3 +270,14 @@ function FORMATION = update_iteration(FORMATION, TRACKS, ENV, M_set, N_set, P_se
         end
     end
 end
+
+function cSelf = selfAcceleration(stallIterations)
+    coef = 0.1;
+    cSelf = 1.49 + stallIterations * coef;
+end
+
+function cSocial = socialAcceleration(stallIterations)
+    coef = 0.1;
+    cSocial = 1.49 + stallIterations * coef;
+end
+
